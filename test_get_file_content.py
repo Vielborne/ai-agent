@@ -1,6 +1,6 @@
 from functions.get_file_content import get_file_content
 
-# Manually test get_file_content with various valid, invalid, and large files
+# Manually test get_file_content with various valid and invalid inputs
 print(get_file_content("calculator", "lorem.txt"))
 print(get_file_content("calculator", "main.py"))
 print(get_file_content("calculator", "pkg/calculator.py"))

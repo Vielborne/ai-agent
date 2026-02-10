@@ -15,7 +15,7 @@ def get_file_content(working_directory, file_path):
         # If the path escapes the working directory, return a permission error
         if not valid_target_dir:
             return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
-            # If the path isn’t a regular file, return a not-found error
+        # If the path isn’t a regular file, return a not-found error
         elif not os.path.isfile(target_dir):
             return f'Error: File not found or is not a regular file: "{file_path}"'
 
@@ -26,6 +26,7 @@ def get_file_content(working_directory, file_path):
                 file_content_string += (
                     f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
                 )
+
         # Return the collected file contents (possibly with a truncation note)
         return file_content_string
 
