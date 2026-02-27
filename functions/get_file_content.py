@@ -1,5 +1,8 @@
 import os
 
+from google import genai
+from google.genai import types
+
 from config import MAX_CHARS
 
 
@@ -33,3 +36,20 @@ def get_file_content(working_directory, file_path):
     # On any unexpected error, return a standardized error string
     except Exception as e:
         return f"Error: {e}"
+
+
+# Schema describing get_file_content function signature for LLM tool calling
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Reads and returns the contents of a file at the given path",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the file to read",
+            ),
+        },
+        required=["file_path"],
+    ),
+)

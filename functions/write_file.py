@@ -1,5 +1,8 @@
 import os
 
+from google import genai
+from google.genai import types
+
 
 # Write or overwrite the content of a file under working directory
 def write_file(working_directory, file_path, content):
@@ -32,3 +35,24 @@ def write_file(working_directory, file_path, content):
     # On any unexpected error, return a standardized error string
     except Exception as e:
         return f"Error: {e}"
+
+
+# Schema describing write_file function signature for LLM tool calling
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Writes content to the file at the given path",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Path to the Python file to run",
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="Content that will be written",
+            ),
+        },
+        required=["file_path", "content"],
+    ),
+)

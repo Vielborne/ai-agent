@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+from call_function import available_functions
 from prompts import system_prompt
 
 # Load environment variables from a .env file
@@ -31,7 +32,9 @@ messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)]
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents=messages,
-    config=types.GenerateContentConfig(system_instruction=system_prompt, temperature=0),
+    config=types.GenerateContentConfig(
+        system_instruction=system_prompt, temperature=0, tools=[available_functions]
+    ),
 )
 
 # If verbose mode is enabled, display additional metadata about the request
@@ -45,8 +48,11 @@ if args.verbose is True:
     # Display token usage statistics
     print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
     print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-    print("Response:")
-    print(response.text)
+# Output requested function calls or fall back to the response text if none made
+function_calls = response.function_calls
+if function_calls:
+    for function_call in function_calls:
+        print(f"Calling function: {function_call.name}({function_call.args})")
 else:
     # In non-verbose mode, just print the response
     print("Response:")
