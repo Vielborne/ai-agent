@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-from call_function import available_functions
+from call_function import available_functions, call_function
 from prompts import system_prompt
 
 # Load environment variables from a .env file
@@ -37,8 +37,9 @@ response = client.models.generate_content(
     ),
 )
 
+verbose = args.verbose
 # If verbose mode is enabled, display additional metadata about the request
-if args.verbose is True:
+if verbose is True:
     print(f"User prompt: {args.user_prompt}")
     # Ensure usage metadata is present before accessing token counts
     if response.usage_metadata is None:
@@ -48,11 +49,30 @@ if args.verbose is True:
     # Display token usage statistics
     print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
     print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+function_results = []
 # Output requested function calls or fall back to the response text if none made
 function_calls = response.function_calls
 if function_calls:
     for function_call in function_calls:
-        print(f"Calling function: {function_call.name}({function_call.args})")
+        function_call_result = call_function(function_call, verbose=verbose)
+        # Parts must exist and be non-empty
+        if not function_call_result.parts:
+            raise Exception("tool response had no parts")
+        # function_response must exist
+        function_response = function_call_result.parts[0].function_response
+        if function_response is None:
+            raise Exception("tool response part had no function_response")
+        # Response field must exist
+        if function_response.response is None:
+            raise Exception("function_response had no response")
+
+        # Save part
+        function_results.append(function_call_result.parts[0])
+
+        # Print response if requested
+        if verbose:
+            print(f"-> {function_response.response}")
 else:
     # In non-verbose mode, just print the response
     print("Response:")
